@@ -1,0 +1,16 @@
+trigger: none
+
+variables:
+  projectName: 'FunctionApp3'
+  tfVarsFilePath: '$(System.DefaultWorkingDirectory)/Projects/app3.tfvars'
+
+stages:
+- template: ../Common/templates/azfunc-tftemplate-pipeline.yml
+  parameters:     
+    projectName: $(projectName)
+    tfVarsFilePath: $(tfVarsFilePath)
+
+
+    
+    
+   
