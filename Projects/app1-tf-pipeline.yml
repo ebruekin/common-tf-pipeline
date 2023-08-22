@@ -1,8 +1,8 @@
 trigger: none
 
 variables:
-  projectName: 'FunctionApp3'
-  tfVarsFilePath: '$(System.DefaultWorkingDirectory)/Projects/app3.tfvars'
+  projectName: 'FunctionApp1'
+  tfVarsFilePath: '$(System.DefaultWorkingDirectory)/Projects/app1.tfvars'
 
 stages:
 - template: ../Common/templates/azfunc-tftemplate-pipeline.yml
