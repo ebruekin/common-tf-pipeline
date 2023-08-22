@@ -1,0 +1,91 @@
+parameters:
+- name: 'projectName'
+  type: string
+
+#- name: 'resource_group_name'
+#  type: string
+
+- name: 'tfVarsFilePath'
+  type: string
+
+#- name: 'backend_key'
+#  type: string
+
+stages:
+- stage: Initialize
+  jobs:
+  - job: InstallTerraform
+    displayName: 'Install Terraform'
+    steps:
+    - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
+      inputs:
+        terraformVersion: 'latest'
+
+- stage: TerraformInit
+  jobs:
+  - job: RunTerraformInit
+    displayName: 'Run Terraform init'
+    steps:
+    - task: TerraformTaskV4@4
+      inputs:
+        provider: 'azurerm'
+        command: 'init'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/Common/Terraform'
+        tfVarsFile: $(tfVarsFilePath)
+        backendServiceArm: 'bkserviceARM'
+        backendAzureRmResourceGroupName: 'bkstrgrg'
+        backendAzureRmStorageAccountName: 'bkstrg'
+        backendAzureRmContainerName: 'bkcontainer'
+        backendAzureRmKey: "Terraform/$(projectName)--tf.tfstate"
+
+- stage: TerraformPlan
+  jobs:
+  - job: RunTerraformPlan
+    displayName: 'Run Terraform plan with init'
+    steps:
+    - task: TerraformTaskV4@4
+      displayName: 'Run Terraform init'
+      inputs:
+        provider: 'azurerm'
+        command: 'init'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/Common/Terraform'
+        tfVarsFile: $(tfVarsFilePath)
+        backendServiceArm: 'bkserviceARM'
+        backendAzureRmResourceGroupName: 'bkstrgrg'
+        backendAzureRmStorageAccountName: 'bkstrg'
+        backendAzureRmContainerName: 'bkcontainer'
+        backendAzureRmKey: "Terraform/$(projectName)--tf.tfstate"
+    
+    - task: TerraformTaskV4@4
+      displayName: 'Run Terraform plan'
+      inputs:
+        provider: 'azurerm'
+        command: 'plan'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/Common/Terraform'  
+        environmentServiceNameAzureRM: 'bkserviceARM'
+        commandOptions: "-var-file=$(tfVarsFilePath)"
+
+- stage: TerraformApply
+  jobs:
+  - job: RunTerraformApply
+    displayName: 'Run Terraform apply'
+    steps:
+    - task: TerraformTaskV4@4
+      displayName: 'Run Terraform init'
+      inputs:
+        provider: 'azurerm'
+        command: 'init'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/Common/Terraform'
+        tfVarsFile: $(tfVarsFilePath)
+        backendServiceArm: 'bkserviceARM'
+        backendAzureRmResourceGroupName: 'bkstrgrg'
+        backendAzureRmStorageAccountName: 'bkstrg'
+        backendAzureRmContainerName: 'bkcontainer'
+        backendAzureRmKey: "Terraform/$(projectName)--tf.tfstate"
+    - task: TerraformTaskV4@4
+      inputs:
+        provider: 'azurerm'
+        command: 'apply'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/Common/Terraform' 
+        environmentServiceNameAzureRM: 'bkserviceARM'
+        commandOptions: "-var-file=$(tfVarsFilePath)"
